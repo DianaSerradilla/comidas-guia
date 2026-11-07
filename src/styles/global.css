@@ -1,0 +1,463 @@
+/* Tokens */
+:root {
+  --ground: #edf1e1;
+  --panel: #fafbf4;
+  --ink: #1b2616;
+  --ink-2: #44543c;
+  --line: rgb(27 38 22 / 0.14);
+  --radius: 14px;
+  --wrap: 40rem;
+  --gutter: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font: 'Archivo Variable', system-ui, sans-serif;
+
+  interpolate-size: allow-keywords;
+  color-scheme: light;
+  accent-color: var(--ink);
+  scrollbar-color: var(--ink-2) var(--ground);
+}
+
+/* Produce colours: one per meal, with its readable text colour. */
+[data-tone='lime'] { --tone: #b7d82c; --on: #1b2616; }
+[data-tone='lemon'] { --tone: #f6c928; --on: #1b2616; }
+[data-tone='tomato'] { --tone: #d63f2a; --on: #ffffff; }
+[data-tone='tangerine'] { --tone: #f58a20; --on: #1b2616; }
+[data-tone='beet'] { --tone: #ee7fa5; --on: #1b2616; }
+[data-tone='leaf'] { --tone: #1e7a3e; --on: #ffffff; }
+[data-tone='grape'] { --tone: #5b3b9c; --on: #ffffff; }
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ground);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-stretch: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: min(100% - 2 * var(--gutter), var(--wrap));
+  margin-inline: auto;
+}
+
+/* Header */
+.top {
+  padding-block: 2rem 0.5rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 12vw, 4rem);
+  font-weight: 900;
+  font-stretch: 125%;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.total {
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.total span {
+  white-space: nowrap;
+}
+
+.total span + span::before {
+  content: '·';
+  margin-inline: 0.45em;
+}
+
+.nb {
+  white-space: nowrap;
+}
+
+.legend {
+  margin: 0.25rem 0 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+
+/* Day picker */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding-block: 0.75rem;
+  background: var(--ground);
+}
+
+.day {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.day legend {
+  padding: 0 0 0.375rem;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgb(27 38 22 / 0.09);
+}
+
+.seg label {
+  position: relative;
+  display: block;
+}
+
+.seg input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.seg span {
+  display: grid;
+  place-items: center;
+  min-height: 2.75rem;
+  border-radius: 9px;
+  font-weight: 800;
+  font-stretch: 112%;
+  transition:
+    background-color 0.2s var(--ease-out),
+    color 0.2s var(--ease-out);
+}
+
+.seg input:checked + span {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.seg input:focus-visible + span {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Day switching without a framework: both stacks are rendered, one is shown. */
+html[data-day='manana'] .stack[data-for='tarde'],
+html[data-day='tarde'] .stack[data-for='manana'] {
+  display: none;
+}
+
+/* Crates */
+.stack {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stack > li {
+  animation: rise 0.45s var(--ease-out) backwards;
+  animation-delay: calc(var(--i) * 45ms);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.crate {
+  border-radius: var(--radius);
+  overflow: clip;
+  background: var(--tone);
+  color: var(--on);
+}
+
+.crate summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.25rem 1rem;
+  min-height: 5.5rem;
+  padding: 1rem 1.125rem;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.crate summary::-webkit-details-marker {
+  display: none;
+}
+
+.crate summary:focus-visible {
+  outline-offset: -6px;
+  outline-color: var(--on);
+}
+
+.seq {
+  min-width: 1.1ch;
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-stretch: 125%;
+  line-height: 1;
+}
+
+.head {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.title {
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.sub {
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+
+.macros {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.kcal {
+  display: grid;
+  justify-items: end;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  line-height: 1;
+  text-align: right;
+}
+
+.kcal small {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-stretch: 100%;
+}
+
+.kcal--range {
+  font-size: 1.125rem;
+}
+
+.end {
+  display: grid;
+  justify-items: end;
+  gap: 0.625rem;
+}
+
+.chev {
+  width: 1.5rem;
+  height: 1.5rem;
+  transition: transform 0.3s var(--ease-out);
+}
+
+.crate[open] .chev {
+  transform: rotate(180deg);
+}
+
+.crate::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.35s var(--ease-out),
+    content-visibility 0.35s allow-discrete;
+}
+
+.crate[open]::details-content {
+  block-size: auto;
+}
+
+/* Open panel */
+.panel {
+  padding: 0.25rem 1.125rem 1.25rem;
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.intro {
+  margin: 1rem 0 0;
+  max-width: 65ch;
+}
+
+.group {
+  margin-top: 1.5rem;
+}
+
+.group-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.125rem 1rem;
+}
+
+.group h3 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 800;
+  font-stretch: 112%;
+  line-height: 1.25;
+}
+
+.tag {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0.125rem 0 0;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.items {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.items li {
+  display: grid;
+  gap: 0.125rem;
+  padding-block: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.items li:first-child {
+  border-top-color: var(--ink);
+}
+
+.item-name {
+  font-weight: 800;
+}
+
+.item-detail {
+  max-width: 65ch;
+}
+
+.item-macros {
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.item-note {
+  margin-top: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--tone) 26%, var(--panel));
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* Cheat meal: the one exception to the colour system, so it is ink, not produce. */
+.free {
+  margin-block: 0.75rem 3rem;
+  padding: 1.25rem 1.125rem 1.5rem;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.free h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 1rem;
+  margin: 0;
+  font-size: clamp(1.2rem, 5vw, 1.5rem);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1.15;
+}
+
+.free h2 span {
+  font-size: 1rem;
+  font-weight: 700;
+  font-stretch: 100%;
+}
+
+.free ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.free li + li {
+  margin-top: 0.375rem;
+}
+
+.free p {
+  margin: 1rem 0 0.25rem;
+  font-weight: 800;
+}
+
+@media (hover: hover) {
+  .crate summary:hover .chev {
+    transform: translateY(2px);
+  }
+
+  .crate[open] summary:hover .chev {
+    transform: rotate(180deg) translateY(2px);
+  }
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gutter: 1.5rem;
+  }
+
+  .top {
+    padding-block-start: 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

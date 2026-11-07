@@ -1,0 +1,80 @@
+---
+import type { Block, Macros, Slot } from '../data/plan';
+
+interface Props {
+  block: Block;
+  slot: Slot;
+  index: number;
+  group: string;
+}
+
+const { block, slot, index, group } = Astro.props;
+
+const num = (n: number) => n.toLocaleString('es-AR', { maximumFractionDigits: 1 });
+
+function macroParts(m: Macros): string[] {
+  const parts: string[] = [];
+  if (m.kcal !== undefined) parts.push(`${num(m.kcal)} kcal`);
+  if (m.p !== undefined) parts.push(`P ${num(m.p)}`);
+  if (m.c !== undefined) parts.push(`C ${num(m.c)}${m.cNote ? ` (${m.cNote})` : ''}`);
+  if (m.g !== undefined) parts.push(`G ${num(m.g)}`);
+  return parts;
+}
+
+const totalMacros = block.total.p !== undefined ? macroParts({ ...block.total, kcal: undefined }).join(' · ') : '';
+---
+
+<li style={`--i:${index}`}>
+  <details class="crate" data-tone={block.tone} name={group}>
+    <summary>
+      <span class="seq" aria-hidden="true">{index + 1}</span>
+      <span class="head">
+        <span class="title">
+          {slot.title.split(' ').map((w, k) => (w.includes('-') ? <span class="nb">{w}</span> : w)).flatMap((w, k) => (k ? [' ', w] : [w]))}
+        </span>
+        {slot.note && <span class="sub">{slot.note}</span>}
+        {block.total.kcal === undefined && <span class="macros">{block.summary}</span>}
+        {totalMacros && <span class="macros">{totalMacros}</span>}
+      </span>
+      <span class="end">
+        {
+          block.total.kcal !== undefined && (
+            <span class="kcal">
+              {num(block.total.kcal)}
+              <small>kcal</small>
+            </span>
+          )
+        }
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </span>
+    </summary>
+
+    <div class="panel">
+      {block.intro && <p class="intro">{block.intro}</p>}
+
+      {
+        block.groups.map((g) => (
+          <section class="group">
+            <div class="group-head">
+              <h3>{g.title}</h3>
+              <span class="tag">{g.mode === 'uno' ? 'Elige 1' : 'Va todo'}</span>
+            </div>
+            {g.hint && <p class="hint">{g.hint}</p>}
+            <ul class="items">
+              {g.items.map((it) => (
+                <li>
+                  <span class="item-name">{it.name}</span>
+                  {it.detail && <span class="item-detail">{it.detail}</span>}
+                  {it.macros && <span class="item-macros">{macroParts(it.macros).join(' · ')}</span>}
+                  {it.note && <span class="item-note">{it.note}</span>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </details>
+</li>

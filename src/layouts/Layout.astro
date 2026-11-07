@@ -1,0 +1,33 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" data-day="manana">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#edf1e1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script is:inline>
+      // Restore the saved training time before first paint to avoid a flash.
+      try {
+        var saved = localStorage.getItem('plan-day');
+        if (saved === 'manana' || saved === 'tarde') document.documentElement.dataset.day = saved;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

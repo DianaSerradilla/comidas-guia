@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Crate from '../components/Crate.astro';
+import { blocks, cheatMeal, dailyTotal, schedules } from '../data/plan';
+
+const days = Object.entries(schedules) as [keyof typeof schedules, (typeof schedules)[keyof typeof schedules]][];
+const fmt = (n: number) => n.toLocaleString('es-AR');
+---
+
+<Layout
+  title="Mi plan de comidas"
+  description="Las comidas pautadas por la nutricionista, con cantidades y macros, según tu horario de entrenamiento."
+>
+  <main class="wrap">
+    <header class="top">
+      <h1>Mi plan</h1>
+      <p class="total">
+        <span>{fmt(dailyTotal.kcal)} kcal por día</span><span>P {dailyTotal.p}</span><span>C {dailyTotal.c}</span><span>G {dailyTotal.g}</span>
+      </p>
+      <p class="legend">P proteína, C carbohidratos, G grasas, en gramos.</p>
+    </header>
+
+    <div class="bar">
+      <fieldset class="day">
+        <legend>¿Cuándo entrenas hoy?</legend>
+        <div class="seg">
+          {
+            days.map(([key, day]) => (
+              <label>
+                <input type="radio" name="day" value={key} checked={key === 'manana'} />
+                <span>{day.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+    </div>
+
+    {
+      days.map(([key, day]) => (
+        <ol class="stack" data-for={key} aria-label={`Comidas con entreno ${day.label}`}>
+          {day.slots.map((slot, i) => (
+            <Crate block={blocks[slot.block]} slot={slot} index={i} group={`meal-${key}`} />
+          ))}
+        </ol>
+      ))
+    }
+
+    <section class="free" aria-labelledby="free-title">
+      <h2 id="free-title">{cheatMeal.title} <span>{cheatMeal.summary}</span></h2>
+      <ul>
+        {cheatMeal.rules.map((r) => <li>{r}</li>)}
+      </ul>
+      <p>Ejemplos</p>
+      <ul>
+        {cheatMeal.examples.map((r) => <li>{r}</li>)}
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const radios = document.querySelectorAll<HTMLInputElement>('input[name="day"]');
+
+    radios.forEach((r) => {
+      r.checked = r.value === root.dataset.day;
+      r.addEventListener('change', () => {
+        if (!r.checked) return;
+        root.dataset.day = r.value;
+        try {
+          localStorage.setItem('plan-day', r.value);
+        } catch {}
+      });
+    });
+  </script>
+</Layout>
